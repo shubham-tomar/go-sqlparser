@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 )
@@ -12,9 +13,9 @@ const (
 	ILLEGAL    TokenType = "ILLEGAL"
 	Identifier TokenType = "Identifier"
 
-	IDENT     TokenType = "IDENT"
+	IDENT     TokenType = "IDENT" // Table name, column name, etc.
 	KEYWORD   TokenType = "KEYWORD"
-	DATA_TYPE TokenType = "DATATYPE"
+	DATATYPE  TokenType = "DATATYPE"
 	NUMBER    TokenType = "NUMBER"
 	STRING    TokenType = "STRING"
 	LPAREN    TokenType = "("
@@ -60,43 +61,45 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
-func (l *Lexer) NextToken() Token {
+func (l *Lexer) NextToken() (Token, error) {
 	l.skipWhitespace()
-	var tok Token
 
 	switch l.ch {
 	case '(':
-		tok = newToken(LPAREN, l.ch)
+		l.readChar()
+		return Token{Type: LPAREN, Literal: "("}, nil
 	case ')':
-		tok = newToken(RPAREN, l.ch)
+		l.readChar()
+		return Token{Type: RPAREN, Literal: ")"}, nil
 	case ',':
-		tok = newToken(COMMA, l.ch)
+		l.readChar()
+		return Token{Type: COMMA, Literal: ","}, nil
 	case ';':
-		tok = newToken(SEMICOLON, l.ch)
+		l.readChar()
+		return Token{Type: SEMICOLON, Literal: ";"}, nil
 	case '.':
-		tok = newToken(DOT, l.ch)
+		l.readChar()
+		return Token{Type: DOT, Literal: "."}, nil
 	case 0:
-		tok = Token{Type: EOF, Literal: ""}
+		return Token{Type: EOF, Literal: ""}, nil
 	default:
 		if isLetter(l.ch) {
 			literal := l.readIdentifier()
 			tokenType := lookupKeyword(literal)
-			return Token{Type: tokenType, Literal: literal}
+
+			return Token{Type: tokenType, Literal: literal}, nil
 		} else if isDigit(l.ch) {
-			return Token{Type: IDENT, Literal: l.readNumber()}
+			return Token{Type: IDENT, Literal: l.readNumber()}, nil
 		} else {
-			tok = Token{Type: ILLEGAL, Literal: string(l.ch)}
+			return Token{Type: ILLEGAL, Literal: string(l.ch)}, fmt.Errorf("unexpected character: '%c'", l.ch)
 		}
 	}
-
-	l.readChar()
-	return tok
 }
 
-// Helper: Convert character into token
-func newToken(tokenType TokenType, ch byte) Token {
-	return Token{Type: tokenType, Literal: string(ch)}
-}
+// // Helper: Convert character into token
+// func newToken(tokenType TokenType, ch byte) Token {
+// 	return Token{Type: tokenType, Literal: string(ch)}
+// }
 
 // readIdentifier reads SQL keywords or identifiers
 func (l *Lexer) readIdentifier() string {

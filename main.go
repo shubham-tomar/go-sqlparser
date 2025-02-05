@@ -6,10 +6,24 @@ import (
 )
 
 func main() {
-	sql := "CREATE TABLE DB.users (id INT, name STRING);"
-	l := lexer.NewLexer(sql)
+	testSQL := []string{
+		"CREATE TABLE users (id INT, name STRING);",
+	}
 
-	for tok := l.NextToken(); tok.Type != lexer.EOF; tok = l.NextToken() {
-		fmt.Printf("Token: Type=%s, Literal=%s\n", tok.Type, tok.Literal)
+	for _, sql := range testSQL {
+		fmt.Println("\nTesting SQL:", sql)
+		l := lexer.NewLexer(sql)
+
+		for {
+			tok, err := l.NextToken()
+			if err != nil {
+				fmt.Println("Error:", err)
+				break
+			}
+			fmt.Printf("Token: Type=%s, Literal=%s\n", tok.Type, tok.Literal)
+			if tok.Type == lexer.EOF {
+				break
+			}
+		}
 	}
 }
