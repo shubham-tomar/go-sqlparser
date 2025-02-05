@@ -15,20 +15,20 @@ const (
 	IDENT     TokenType = "IDENT"
 	KEYWORD   TokenType = "KEYWORD"
 	DATA_TYPE TokenType = "DATATYPE"
+	NUMBER    TokenType = "NUMBER"
+	STRING    TokenType = "STRING"
 	LPAREN    TokenType = "("
 	RPAREN    TokenType = ")"
 	LBRACE    TokenType = "{"
 	RBRACE    TokenType = "}"
 	COMMA     TokenType = ","
 	SEMICOLON TokenType = ";"
-
-	NUMBER   TokenType = "NUMBER"
-	STRING   TokenType = "STRING"
-	PLUS     TokenType = "PLUS"
-	MINUS    TokenType = "MINUS"
-	ASTERISK TokenType = "ASTERISK"
-	SLASH    TokenType = "SLASH"
-	COLON    TokenType = "COLON"
+	DOT       TokenType = "."
+	PLUS      TokenType = "+"
+	MINUS     TokenType = "-"
+	ASTERISK  TokenType = "*"
+	SLASH     TokenType = "/"
+	COLON     TokenType = ":"
 )
 
 type Token struct {
@@ -73,6 +73,8 @@ func (l *Lexer) NextToken() Token {
 		tok = newToken(COMMA, l.ch)
 	case ';':
 		tok = newToken(SEMICOLON, l.ch)
+	case '.':
+		tok = newToken(DOT, l.ch)
 	case 0:
 		tok = Token{Type: EOF, Literal: ""}
 	default:
@@ -102,6 +104,7 @@ func (l *Lexer) readIdentifier() string {
 	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
+
 	return l.input[position:l.position]
 }
 
